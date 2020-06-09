@@ -18,6 +18,10 @@ import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.NotificationChannel;
+
 import com.carusto.ReactNativePjSip.dto.AccountConfigurationDTO;
 import com.carusto.ReactNativePjSip.dto.CallSettingsDTO;
 import com.carusto.ReactNativePjSip.dto.ServiceConfigurationDTO;
@@ -57,6 +61,9 @@ import java.util.List;
 import java.util.Map;
 
 public class PjSipService extends Service {
+
+    private static final int SERVICE_NOTIFICATION_ID = 123;
+    private static final String CHANNEL_ID = "PJSIP";
 
     private static String TAG = "PjSipService";
 
@@ -207,6 +214,18 @@ public class PjSipService extends Service {
         }
     }
 
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Pjsip", importance);
+            channel.setDescription("CHANEL DESCRIPTION bla bla bla");
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
@@ -214,6 +233,14 @@ public class PjSipService extends Service {
             if (intent != null && intent.hasExtra("service")) {
                 mServiceConfiguration = ServiceConfigurationDTO.fromMap((Map) intent.getSerializableExtra("service"));
             }
+
+//        Intent notificationIntent = new Intent(this, MainActivity.class);
+
+        createNotificationChannel();
+
+        Notification.Builder notification = new Notification.Builder(this, CHANNEL_ID).setContentTitle("testContentTitle").setContentText("testContentText").setOngoing(true).setSound(null);
+
+        startForeground(SERVICE_NOTIFICATION_ID, notification.build());
 
             mWorkerThread = new HandlerThread(getClass().getSimpleName(), Process.THREAD_PRIORITY_FOREGROUND);
             mWorkerThread.setPriority(Thread.MAX_PRIORITY);
@@ -1011,7 +1038,7 @@ public class PjSipService extends Service {
                     mWifiLock.acquire();
 
                     if (callState == pjsip_inv_state.PJSIP_INV_STATE_EARLY || callState == pjsip_inv_state.PJSIP_INV_STATE_CONFIRMED) {
-                        mAudioManager.setMode(AudioManager.MODE_IN_CALL);
+                        mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
                     }
                 }
             });
