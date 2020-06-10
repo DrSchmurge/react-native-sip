@@ -48,6 +48,7 @@ import org.pjsip.pjsua2.StringVector;
 import org.pjsip.pjsua2.TransportConfig;
 import org.pjsip.pjsua2.CodecInfoVector;
 import org.pjsip.pjsua2.CodecInfo;
+import org.pjsip.pjsua2.IpChangeParam;
 import org.pjsip.pjsua2.VideoDevInfo;
 import org.pjsip.pjsua2.pj_qos_type;
 import org.pjsip.pjsua2.pjmedia_orient;
@@ -417,6 +418,9 @@ public class PjSipService extends Service {
                 handleCallDtmf(intent);
             case PjActions.ACTION_CHANGE_CODEC_SETTINGS:
                 handleChangeCodecSettings(intent);
+                break;
+            case PjActions.ACTION_HANDLE_IP_CHANGE:
+                handleIpAddressChange(intent);
                 break;
 
             // Configuration actions
@@ -917,6 +921,22 @@ public class PjSipService extends Service {
 
             mEmitter.fireIntentHandled(intent);
         } catch (Exception e) {
+            mEmitter.fireIntentHandled(intent, e);
+        }
+    }
+
+    private void handleIpAddressChange(Intent intent) {
+        try {
+            IpChangeParam param;
+            param = new IpChangeParam();
+            param.setRestartLisDelay(0);
+            param.setRestartListener(false);
+
+            mEndpoint.handleIpChange(param);
+
+            mEmitter.fireIntentHandled(intent);
+        } catch (Exception e) {
+            Log.w(TAG, "HANDLE_IP_ADDRESS_CHANGE_ERROR", e);
             mEmitter.fireIntentHandled(intent, e);
         }
     }

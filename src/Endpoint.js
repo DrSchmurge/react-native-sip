@@ -134,6 +134,18 @@ export default class Endpoint extends EventEmitter {
         });
     }
 
+    handleIpChange() {
+        return new Promise(function(resolve, reject) {
+            NativeModules.PjSipModule.handleIpChange((successful, data) => {
+                if (successful) {
+                    resolve(data);
+                } else {
+                    reject(data);
+                }
+            });
+        });
+    }
+
     /**
      * @param configuration
      * @returns {Promise}

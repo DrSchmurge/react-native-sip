@@ -166,4 +166,10 @@ public class PjSipModule extends ReactContextBaseJavaModule {
         Intent intent = PjActions.createChangeCodecSettingsIntent(callbackId, codecSettings, getReactApplicationContext());
         getReactApplicationContext().startService(intent);
     }
+
+    @ReactMethod
+    public void handleIpChange(Callback callback) {
+        Intent intent = PjActions.createHandleIpChangeIntent(getReactApplicationContext());
+        getReactApplicationContext().startService(intent);
+    }
 }
